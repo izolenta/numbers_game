@@ -7,11 +7,14 @@ class GameHeader extends StatelessWidgetProxy with DimensionHelper {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: getPercentFromWidth(context, 10), top: getPercentFromWidth(context, 10)),
+      padding: EdgeInsets.only(
+        left: getPercentFromWidth(context, 5),
+        top: getPercentFromWidth(context, 5),
+        bottom: getPercentFromWidth(context, 2),
+      ),
       child: Text('2048', style: TextStyle(
           color: Colors.teal,
           fontSize: 72 * getFactor(context),
-          fontWeight: FontWeight.bold,
           letterSpacing: 2.0,
         ),
       ),

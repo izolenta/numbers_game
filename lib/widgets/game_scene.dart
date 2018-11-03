@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:numbers_game/services/game_service.dart';
 import 'package:numbers_game/util/dimension_helper.dart';
+import 'package:numbers_game/widgets/game_board.dart';
 import 'package:numbers_game/widgets/game_header.dart';
 
 
@@ -23,10 +24,11 @@ class _GameSceneState extends State<GameScene> with DimensionHelper {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         GameHeader(),
 //        GameToolbar(),
-//        GameBoard(),
+        GameBoard(),
 //        GameHint(),
       ],
     );
