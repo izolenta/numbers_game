@@ -27,8 +27,8 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
 
     final boardWidgets = _createBoardWidgets();
 
-    return Stack(
-      children: boardWidgets,
+    return GestureDetector(
+      child: Stack(children: boardWidgets)
     );
   }
 
