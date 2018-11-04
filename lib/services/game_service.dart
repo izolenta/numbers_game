@@ -42,7 +42,7 @@ class GameService {
   }
 
   void _addRandomSquare() {
-    if (squares.length < 16) {
+    if (squares.length == 16) {
       _gameLost();
       return;
     }
@@ -50,8 +50,11 @@ class GameService {
     squares.forEach((m) => freeCells.remove(m.index));
     final value = _random.nextInt(4) == 3? 4 : 2;
     final index = _random.nextInt(freeCells.length);
+    print('added value $value at index $index');
     squares.add(SquareModel(index: index, value: value));
   }
 
   void _gameLost() {}
+
+  getSquareAtIndex(int index) => squares.firstWhere((m) => m.index == index, orElse: () => null);
 }
