@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:numbers_game/services/game_service.dart';
 import 'package:numbers_game/util/dimension_helper.dart';
+import 'package:numbers_game/util/direction.dart';
 import 'package:numbers_game/util/subscriber.dart';
 import 'package:swipedetector/swipedetector.dart';
 
@@ -40,13 +41,15 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
 
     return SwipeDetector(
       child: Stack(children: boardWidgets),
-      onSwipeUp: _gameService.turnUp,
-      onSwipeDown: _gameService.turnDown,
-      onSwipeLeft: _gameService.turnLeft,
-      onSwipeRight: _gameService.turnRight,
+      onSwipeUp: () => _gameService.turn(Direction.top),
+      onSwipeDown: () =>_gameService.turn(Direction.bottom),
+      onSwipeLeft: () => _gameService.turn(Direction.left),
+      onSwipeRight: () =>_gameService.turn(Direction.right),
       swipeConfiguration: SwipeConfiguration(
-        horizontalSwipeMinDisplacement: 30.0,
-        verticalSwipeMinDisplacement: 30.0,
+//        horizontalSwipeMinDisplacement: 50.0,
+//        verticalSwipeMinDisplacement: 50.0,
+//        horizontalSwipeMaxHeightThreshold: 30.0,
+//        verticalSwipeMaxWidthThreshold: 30.0,
       ),
     );
   }

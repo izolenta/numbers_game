@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:numbers_game/util/direction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:numbers_game/services/square_model.dart';
+import 'package:collection/collection.dart';
 
 class GameService {
 
-  static const swipeConfig = const [
-    [-1, 0],
-    [1, 0],
-    [0, -1],
-    [0, 1]
+  Function eq = const ListEquality().equals;
+
+  var transformFunc = <List<TransformFunction>>[
+    [null, null],
+    [_turnCounterClockwise, _turnClockwise],
+    [_turnHalfWay, _turnHalfWay],
+    [_turnClockwise, _turnCounterClockwise],
   ];
 
   final Random _random = Random();
@@ -25,7 +29,10 @@ class GameService {
   int get score => _score;
   int get topScore => _topScore;
 
+  GameState _state;
+
   SharedPreferences _storage;
+
 
   GameService() {
     _initService();
@@ -40,6 +47,7 @@ class GameService {
   void initNewGame() {
     squares.clear();
     _score = 0;
+    _state = GameState.inProgress;
     _addRandomSquare();
     _addRandomSquare();
     _onStateChangedController.add(null);
@@ -50,111 +58,84 @@ class GameService {
   }
 
   void _addRandomSquare() {
-    if (squares.length == 16) {
-      _gameLost();
-      return;
-    }
+    _checkWinGame();
     final freeCells = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
     squares.forEach((m) => freeCells.remove(m.index));
     final value = _random.nextInt(4) == 3? 4 : 2;
     final index = _random.nextInt(freeCells.length);
     squares.add(SquareModel(index: freeCells[index], value: value, justAdded: true));
+    _checkLoseGame();
   }
 
-  void _gameLost() {}
-
-  SquareModel getSquareAtIndex(int index) => squares.firstWhere((m) => m.index == index, orElse: () => null);
-
-  SquareModel getSquareAtCoords(int x, int y) => squares.firstWhere((m) => m.x == x && m.y == y, orElse: () => null);
-
-  void turnUp() {
-    for (int i=0; i<4; i++) {
-      _moveColumnVertically(i, -1);
+  void _checkWinGame() {
+    if (squares.firstWhere((m) => m.value == 2048, orElse: () => null) != null) {
+      _state = GameState.won;
+      print("WON!");
+      _onStateChangedController.add(null);
     }
-    _addRandomSquare();
-    _onStateChangedController.add(null);
   }
 
-  void turnDown() {
-    for (int i=0; i<4; i++) {
-      _moveColumnVertically(i, 1);
+  void _checkLoseGame() {
+    if (squares.length == 16) {
+      for (int i=0; i<16; i++) {
+        final model = _findSquareAt(squares, i % 4, i ~/ 4);
+        if (model.x > 0 && _findSquareAt(squares, model.x-1, model.y).value == model.value) return;
+        if (model.x < 3 && _findSquareAt(squares, model.x+1, model.y).value == model.value) return;
+        if (model.y > 0 && _findSquareAt(squares, model.x, model.y-1).value == model.value) return;
+        if (model.y < 3 && _findSquareAt(squares, model.x, model.y+1).value == model.value) return;
+      }
+      _state = GameState.lost;
+      print("LOST!");
+      _onStateChangedController.add(null);
     }
-    _addRandomSquare();
-    _onStateChangedController.add(null);
   }
 
-  void turnLeft() {
-    for (int i=0; i<4; i++) {
-      _moveRowHorizontally(i, -1);
+  void turn(Direction direction) {
+    if (_state == GameState.inProgress) {
+      _rotateBoard(transformFunc[direction.value].first);
+      final result = _moveRowLeft(squares);
+      if (!eq(squares, result)) {
+        squares.replaceRange(0, squares.length, result);
+        _rotateBoard(transformFunc[direction.value].last);
+        _addRandomSquare();
+      }
+      else {
+        _rotateBoard(transformFunc[direction.value].last);
+      }
+      _onStateChangedController.add(null);
     }
-    _addRandomSquare();
-    _onStateChangedController.add(null);
   }
 
-  void turnRight() {
+  List<SquareModel>_moveRowLeft(List<SquareModel> squareModel) {
+    final newSquareModel = List<SquareModel>.from(squareModel);
     for (int i=0; i<4; i++) {
-      _moveRowHorizontally(i, 1);
-    }
-    _addRandomSquare();
-    _onStateChangedController.add(null);
-  }
-
-  void _moveRowHorizontally(int row, int direction) {
-    final cellPositions = direction > 0? [3, 2, 1, 0] : [0, 1, 2, 3];
-    bool movePerformed;
-    do {
-      movePerformed = false;
-      for (var x in cellPositions) {
-        var model = getSquareAtCoords(x, row);
-        if (model != null) {
-          var newX = x + direction;
-          if (newX >= 0 && newX <= 3) {
-            final square = getSquareAtCoords(newX, row);
-            if (square == null) {
-              squares[squares.indexOf(model)] = new SquareModel(index: model.index + direction, value: model.value);
-              movePerformed = true;
-            }
-            else {
-              if (square.value == model.value) {
-                squares.remove(model);
-                squares[squares.indexOf(square)] = new SquareModel(index: square.index, value: square.value * 2);
+      bool movePerformed;
+      do {
+        movePerformed = false;
+        for (var x = 0; x<4; x++ ) {
+          var model = _findSquareAt(newSquareModel, x, i);
+          if (model != null) {
+            var newX = x - 1;
+            if (newX >= 0 && newX <= 3) {
+              final square = _findSquareAt(newSquareModel, newX, i);
+              if (square == null) {
+                newSquareModel[newSquareModel.indexOf(model)] = new SquareModel(index: model.index - 1, value: model.value);
                 movePerformed = true;
-                _updateScore(square.value * 2);
+              }
+              else {
+                if (square.value == model.value) {
+                  newSquareModel.remove(model);
+                  newSquareModel[newSquareModel.indexOf(square)] = new SquareModel(index: square.index, value: square.value * 2);
+                  movePerformed = true;
+                  _updateScore(square.value * 2);
+                }
               }
             }
           }
         }
-      }
-    } while (movePerformed);
-  }
-
-  void _moveColumnVertically(int column, int direction) {
-    final cellPositions = direction > 0? [3, 2, 1, 0] : [0, 1, 2, 3];
-    bool movePerformed;
-    do {
-      movePerformed = false;
-      for (var y in cellPositions) {
-        var model = getSquareAtCoords(column, y);
-        if (model != null) {
-          var newY = y + direction;
-          if (newY >= 0 && newY <= 3) {
-            final square = getSquareAtCoords(column, newY);
-            if (square == null) {
-              squares[squares.indexOf(model)] = new SquareModel(index: model.index + direction * 4, value: model.value);
-              movePerformed = true;
-            }
-            else {
-              if (square.value == model.value) {
-                squares.remove(model);
-                squares[squares.indexOf(square)] = new SquareModel(index: square.index, value: square.value * 2);
-                movePerformed = true;
-                _updateScore(square.value * 2);
-              }
-            }
-          }
-        }
-      }
-    } while (movePerformed);
+      } while (movePerformed);
+    }
+    return newSquareModel;
   }
 
   void _updateScore(int addition) {
@@ -164,4 +145,24 @@ class GameService {
       _storage.setInt('topScore', topScore);
     }
   }
+
+  static SquareModel _turnCounterClockwise(SquareModel model) => model.copyWithParams(index: (3-model.x) * 4 + model.y);
+  static SquareModel _turnClockwise(SquareModel model) => model.copyWithParams(index: model.x * 4 + (3 - model.y));
+  static SquareModel _turnHalfWay(SquareModel model) => model.copyWithParams(index: (3 - model.x) + (3 - model.y) * 4);
+
+  void _rotateBoard(TransformFunction func) {
+    if (func != null) {
+      for (int i = 0; i < squares.length; i++)
+        squares[i] = func(squares[i]);
+    }
+  }
+
+  SquareModel _findSquareAt(List<SquareModel> sqModel, int x, int y) => sqModel.firstWhere((m) => m.x == x && m.y == y, orElse: () => null);
+
+}
+
+typedef TransformFunction = SquareModel Function(SquareModel model);
+
+enum GameState {
+  inProgress, won, lost
 }

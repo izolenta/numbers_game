@@ -10,10 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^0.1.2
-  screen: any
+  screen: ^0.0.4
   flutter_simple_dependency_injection: ^0.0.5
   shared_preferences: ^0.4.3
-  swipedetector: any
+  swipedetector: ^1.2.0
+  collection: ^1.14.11
 
 dev_dependencies:
   flutter_test:
