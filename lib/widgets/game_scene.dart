@@ -4,6 +4,7 @@ import 'package:numbers_game/services/game_service.dart';
 import 'package:numbers_game/util/dimension_helper.dart';
 import 'package:numbers_game/widgets/game_board.dart';
 import 'package:numbers_game/widgets/game_header.dart';
+import 'package:numbers_game/widgets/game_toolbar.dart';
 
 
 class GameScene extends StatefulWidget {
@@ -27,9 +28,8 @@ class _GameSceneState extends State<GameScene> with DimensionHelper {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         GameHeader(),
-//        GameToolbar(),
         GameBoard(),
-//        GameHint(),
+        GameToolbar(),
       ],
     );
   }

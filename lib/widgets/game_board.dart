@@ -16,9 +16,20 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
 
   final GameService _gameService = Injector.getInjector().get<GameService>();
 
+  AnimationController appearingAnimationController;
+  Animation<double> appearingAnimation;
+
+
   @override
   void initState() {
     subscriptions.add(_gameService.onStateChanged.listen((_) => setState(() {})));
+
+    appearingAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )
+      ..addListener(() => setState(() {}));
+
     super.initState();
   }
 
@@ -82,12 +93,7 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
             child: Center(child: Text(model.value.toString(), style: TextStyle(color: Colors.white, fontSize: 48 * getFactor(context))))
         ),
       );
-      squares.add(
-        next
-//          model.justAdded
-//              ? AnimatedSize(duration: Duration(milliseconds: 200), vsync: this, child: next, curve: Curves.elasticIn)
-//              : next
-      );
+      squares.add(next);
     }
 
     final stack = Stack(children: squares);

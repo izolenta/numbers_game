@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:numbers_game/util/dimension_helper.dart';
+import 'package:numbers_game/widgets/stateless_widget_proxy.dart';
 
 class GameHeader extends StatelessWidgetProxy with DimensionHelper {
 
@@ -20,10 +21,4 @@ class GameHeader extends StatelessWidgetProxy with DimensionHelper {
       ),
     );
   }
-}
-
-//a dirty hack because of https://github.com/dart-lang/sdk/issues/31543
-class StatelessWidgetProxy extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => null;
 }

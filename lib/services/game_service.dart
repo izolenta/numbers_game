@@ -118,6 +118,7 @@ class GameService {
                 squares.remove(model);
                 squares[squares.indexOf(square)] = new SquareModel(index: square.index, value: square.value * 2);
                 movePerformed = true;
+                _updateScore(square.value * 2);
               }
             }
           }
@@ -146,11 +147,20 @@ class GameService {
                 squares.remove(model);
                 squares[squares.indexOf(square)] = new SquareModel(index: square.index, value: square.value * 2);
                 movePerformed = true;
+                _updateScore(square.value * 2);
               }
             }
           }
         }
       }
     } while (movePerformed);
+  }
+
+  void _updateScore(int addition) {
+    _score += addition;
+    if (_topScore < score) {
+      _topScore = score;
+      _storage.setInt('topScore', topScore);
+    }
   }
 }
