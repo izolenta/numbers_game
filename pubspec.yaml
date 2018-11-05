@@ -13,6 +13,7 @@ dependencies:
   screen: any
   flutter_simple_dependency_injection: ^0.0.5
   shared_preferences: ^0.4.3
+  swipedetector: any
 
 dev_dependencies:
   flutter_test:

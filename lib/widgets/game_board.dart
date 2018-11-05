@@ -5,7 +5,7 @@ import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:numbers_game/services/game_service.dart';
 import 'package:numbers_game/util/dimension_helper.dart';
 import 'package:numbers_game/util/subscriber.dart';
-
+import 'package:swipedetector/swipedetector.dart';
 
 class GameBoard extends StatefulWidget {
   @override
@@ -27,8 +27,16 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
 
     final boardWidgets = _createBoardWidgets();
 
-    return GestureDetector(
-      child: Stack(children: boardWidgets)
+    return SwipeDetector(
+      child: Stack(children: boardWidgets),
+      onSwipeUp: _gameService.turnUp,
+      onSwipeDown: _gameService.turnDown,
+      onSwipeLeft: _gameService.turnLeft,
+      onSwipeRight: _gameService.turnRight,
+      swipeConfiguration: SwipeConfiguration(
+        horizontalSwipeMinDisplacement: 30.0,
+        verticalSwipeMinDisplacement: 30.0,
+      ),
     );
   }
 
@@ -50,7 +58,6 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
     final squares = <Widget>[];
 
     for (var i=0; i<16; i++) {
-      final squareModel = _gameService.getSquareAtIndex(i);
       final x = i % 4;
       final y = i ~/ 4;
       squares.add(Positioned(
@@ -59,10 +66,20 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
         child: Container(
           width: cellSize,
           height: cellSize,
-          decoration: BoxDecoration(color: _getColor(squareModel?.value?? 0), borderRadius: BorderRadius.all(Radius.circular(boardRadius))),
-          child: squareModel != null
-              ? Center(child: Text(squareModel.value.toString(), style: TextStyle(color: Colors.white, fontSize: 48 * getFactor(context))))
-              : null
+          decoration: BoxDecoration(color: _getColor(0), borderRadius: BorderRadius.all(Radius.circular(boardRadius))),
+        ),
+      ));
+    }
+
+    for (var model in _gameService.squares) {
+      squares.add(Positioned(
+        top: cellGap + (model.y * (cellSize + cellGap)),
+        left: cellGap + (model.x * (cellSize + cellGap)),
+        child: Container(
+          width: cellSize,
+          height: cellSize,
+          decoration: BoxDecoration(color: _getColor(model.value), borderRadius: BorderRadius.all(Radius.circular(boardRadius))),
+          child: Center(child: Text(model.value.toString(), style: TextStyle(color: Colors.white, fontSize: 48 * getFactor(context))))
         ),
       ));
     }
