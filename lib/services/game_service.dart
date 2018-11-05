@@ -39,6 +39,7 @@ class GameService {
 
   void initNewGame() {
     squares.clear();
+    _score = 0;
     _addRandomSquare();
     _addRandomSquare();
     _onStateChangedController.add(null);
