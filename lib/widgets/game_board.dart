@@ -12,7 +12,7 @@ class GameBoard extends StatefulWidget {
   State<GameBoard> createState() => _GameBoardState();
 }
 
-class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberMixin {
+class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberMixin, TickerProviderStateMixin {
 
   final GameService _gameService = Injector.getInjector().get<GameService>();
 
@@ -72,16 +72,22 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
     }
 
     for (var model in _gameService.squares) {
-      squares.add(Positioned(
+      final next = Positioned(
         top: cellGap + (model.y * (cellSize + cellGap)),
         left: cellGap + (model.x * (cellSize + cellGap)),
         child: Container(
-          width: cellSize,
-          height: cellSize,
-          decoration: BoxDecoration(color: _getColor(model.value), borderRadius: BorderRadius.all(Radius.circular(boardRadius))),
-          child: Center(child: Text(model.value.toString(), style: TextStyle(color: Colors.white, fontSize: 48 * getFactor(context))))
+            width: cellSize,
+            height: cellSize,
+            decoration: BoxDecoration(color: _getColor(model.value), borderRadius: BorderRadius.all(Radius.circular(boardRadius))),
+            child: Center(child: Text(model.value.toString(), style: TextStyle(color: Colors.white, fontSize: 48 * getFactor(context))))
         ),
-      ));
+      );
+      squares.add(
+        next
+//          model.justAdded
+//              ? AnimatedSize(duration: Duration(milliseconds: 200), vsync: this, child: next, curve: Curves.elasticIn)
+//              : next
+      );
     }
 
     final stack = Stack(children: squares);
@@ -104,11 +110,11 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
     return result;
   }
 
-  static const _colors = [
-    Colors.tealAccent,
+  final _colors = [
+    Colors.white70,
     Colors.lightBlueAccent,
     Colors.lightBlue,
-    Colors.blue,
+    Color(0xFF0D47A1),
     Colors.lime,
     Colors.amber,
     Colors.redAccent,
@@ -123,6 +129,6 @@ class _GameBoardState extends State<GameBoard> with DimensionHelper, SubscriberM
     if (number == 0) {
       return _colors[0];
     }
-    return _colors[sqrt(number).floor()];
+    return _colors[(log(number)/ln2).floor()];
   }
 }

@@ -57,7 +57,7 @@ class GameService {
     squares.forEach((m) => freeCells.remove(m.index));
     final value = _random.nextInt(4) == 3? 4 : 2;
     final index = _random.nextInt(freeCells.length);
-    squares.add(SquareModel(index: freeCells[index], value: value));
+    squares.add(SquareModel(index: freeCells[index], value: value, justAdded: true));
   }
 
   void _gameLost() {}
