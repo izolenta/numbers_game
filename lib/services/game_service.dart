@@ -91,6 +91,7 @@ class GameService {
   }
 
   void turn(Direction direction) {
+    print('Swipe $direction');
     if (_state == GameState.inProgress) {
       _rotateBoard(transformFunc[direction.value].first);
       final result = _moveRowLeft(squares);
